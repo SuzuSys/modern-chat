@@ -89,7 +89,47 @@
 			</tbody>
 		</v-table>
 	</v-container>
-	<v-snackbar-queue v-model="messages" :timeout="200000" />
+	<v-container class="py-4">
+		<v-card class="mx-auto" max-width="640" rounded="lg">
+			<v-container>
+				<v-row align="center" density="compact">
+					<v-col cols="12" sm>
+						<v-text-field
+							v-model="sendtoId"
+							density="compact"
+							hide-details="auto"
+							label="Target peer ID"
+							variant="outlined"
+						/>
+					</v-col>
+
+					<v-col cols="12" sm>
+						<v-text-field
+							v-model="messageToSend"
+							density="compact"
+							hide-details="auto"
+							label="Message"
+							variant="outlined"
+						/>
+					</v-col>
+
+					<v-col cols="12" sm="auto">
+						<v-btn
+							block
+							color="primary"
+							variant="outlined"
+							:disabled="!messageToSend.trim() && !sendtoId.trim()"
+							:loading="isConnecting"
+							@click="SendMessage"
+						>
+							Send
+						</v-btn>
+					</v-col>
+				</v-row>
+			</v-container>
+		</v-card>
+	</v-container>
+	<v-snackbar-queue v-model="messages" :timeout="2000" />
 </template>
 
 <script setup lang="ts">
@@ -105,6 +145,9 @@ const nameRules = {
 };
 
 const peer = new Peer();
+
+const sendtoId = ref("");
+const messageToSend = ref("");
 
 const myId = ref("");
 const inputtedMyName = ref("");
@@ -228,6 +271,22 @@ function receivePeerMessageWrapper(conn: DataConnection) {
 			});
 		}
 	};
+}
+
+function SendMessage() {
+	if ([...connectedDestId.value.keys()].includes(sendtoId.value)) {
+		console.log("in");
+		const peerConn = connectedDestId.value.get(sendtoId.value);
+		console.log(peerConn);
+		if (peerConn) {
+			const peerData: PeerData = {
+				type: "message",
+				content: messageToSend.value,
+				handshakeFirst: false,
+			};
+			peerConn.conn.send(peerData);
+		}
+	}
 }
 
 function registerName() {
