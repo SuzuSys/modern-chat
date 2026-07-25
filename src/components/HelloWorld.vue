@@ -40,22 +40,18 @@
     </v-card>
   </v-container>
 
-  <v-container class="py-4">
+  <v-container v-if="!!myName" class="py-4">
     <v-card class="mx-auto" max-width="640" rounded="lg">
-      <v-container>
-        <v-row align="center" density="compact">
-          <v-col cols="12" sm>
-            <v-text-field
-              v-model="destId"
-              density="compact"
-              :disabled="isConnecting"
-              hide-details="auto"
-              label="Dest peer ID"
-              variant="outlined"
-            />
-          </v-col>
-
-          <v-col cols="12" sm="auto">
+      <v-card-text>
+        <v-text-field
+          v-model="destId"
+          density="compact"
+          :disabled="isConnecting"
+          hide-details="auto"
+          label="Dest peer ID"
+          variant="outlined"
+        >
+          <template #append>
             <v-btn
               block
               color="primary"
@@ -66,9 +62,9 @@
             >
               {{ isConnecting ? "Connecting..." : "Connect" }}
             </v-btn>
-          </v-col>
-        </v-row>
-      </v-container>
+          </template>
+        </v-text-field>
+      </v-card-text>
     </v-card>
   </v-container>
 
@@ -197,7 +193,6 @@
   }
 
   peer.on('open', id => {
-    console.log('My peer ID is: ' + id)
     myId.value = id
   })
 
