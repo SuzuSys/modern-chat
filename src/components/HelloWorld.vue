@@ -2,12 +2,6 @@
   <v-container class="py-4">
     <v-card class="mx-auto" max-width="640" rounded="lg">
       <v-card-text>
-        <div>
-          Your peer ID is:
-          <code> {{ myId }} </code>
-          <CopyClipboard :text="myId" />
-        </div>
-
         <v-text-field
           v-model="inputtedMyName"
           counter
@@ -35,6 +29,12 @@
         <div v-if="!!myName">
           Your name is:
           <code> {{ myName }} </code>
+        </div>
+
+        <div v-if="!!myName">
+          Your peer ID is:
+          <code> {{ myId }} </code>
+          <CopyClipboard :text="myId" />
         </div>
       </v-card-text>
     </v-card>
@@ -171,6 +171,10 @@
     handshakeFirst: boolean
   }
 
+  peer.on('open', id => {
+    myId.value = id
+  })
+
   function isPeerData (data: unknown): data is PeerData {
     // 1. オブジェクトであり、nullではないことをチェック
     if (typeof data !== 'object' || data === null) {
@@ -191,16 +195,6 @@
 
     return hasValidType && hasValidContent && hasValidHandshakeFirst
   }
-
-  peer.on('open', id => {
-    myId.value = id
-  })
-
-  peer.on('connection', conn => {
-    console.log(conn)
-    connectedDestId.value.set(conn.peer, { conn, name: '' })
-    conn.on('data', receivePeerMessageWrapper(conn))
-  })
 
   async function handleConnect () {
     if (isConnecting.value) {
@@ -286,7 +280,16 @@
     }
   }
 
+  peer.on('error', error => {
+    console.log(error)
+  })
+
   function registerName () {
     myName.value = inputtedMyName.value
+
+    peer.on('connection', conn => {
+      connectedDestId.value.set(conn.peer, { conn, name: '' })
+      conn.on('data', receivePeerMessageWrapper(conn))
+    })
   }
 </script>
